@@ -19,6 +19,14 @@ VIDEO_DOSYA_ADI = 'furkan.mp4'
 async def on_ready():
     print(f'Bot hazır: {bot.user}')
 
+# --- YETKİ HATA YAKALAYICI ---
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.MissingPermissions):
+        await ctx.send("Yetkin yetmiyor, otur ağla :::")
+    else:
+        raise error
+
 # --- KOMUTLAR ---
 @bot.command()
 async def valdo(ctx): await ctx.send("YARRAMM VALDO BU KIM AMK")
@@ -52,6 +60,15 @@ async def atam(ctx):
     else:
         await ctx.send("Hata: ataturk.jpg dosyası bulunamadı!")
 
+# YENİ KOMUT
+@bot.command()
+async def furkandomalma(ctx):
+    if os.path.exists('furkandomalma.jpg'):
+        await ctx.send(file=discord.File('furkandomalma.jpg'))
+    else:
+        await ctx.send("Hata: furkandomalma.jpg dosyası bulunamadı!")
+
+# --- YÖNETİCİ KOMUTLARI ---
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def ban(ctx, member: discord.Member, *, reason=None):
@@ -111,7 +128,7 @@ async def dur_sil(ctx):
     silme_aktif = False
     await ctx.send("Kanal silme işlemi durduruldu.")
 
-# --- RENDER İÇİN GÜVENLİ ÇALIŞTIRMA ---
+# --- RENDER İÇİN ÇALIŞTIRMA ---
 token = os.environ.get('DISCORD_TOKEN')
 if token:
     bot.run(token)
