@@ -44,9 +44,77 @@ async def on_command_error(ctx, error):
         print(f"Hata: {error}")
         await ctx.send(f"❌ Hata: {str(error)[:100]}")
 
-# --- Yardımcı Fonksiyon: Avatar Birleştir (Ship için) ---
+# --- Yardımcı Fonksiyon: Adam Asmaca ASCII Art ---
+def adam_ascii(can):
+    ascii_art = [
+        """
+        +---+
+        |   |
+            |
+            |
+            |
+            |
+        =========
+        """,
+        """
+        +---+
+        |   |
+        O   |
+            |
+            |
+            |
+        =========
+        """,
+        """
+        +---+
+        |   |
+        O   |
+        |   |
+            |
+            |
+        =========
+        """,
+        """
+        +---+
+        |   |
+        O   |
+       /|   |
+            |
+            |
+        =========
+        """,
+        """
+        +---+
+        |   |
+        O   |
+       /|\\  |
+            |
+            |
+        =========
+        """,
+        """
+        +---+
+        |   |
+        O   |
+       /|\\  |
+       /    |
+            |
+        =========
+        """,
+        """
+        +---+
+        |   |
+        O   |
+       /|\\  |
+       / \\  |
+            |
+        =========
+        """
+    ]
+    return ascii_art[6 - can] if 0 <= can <= 6 else ascii_art[0]
+
+# --- Yardımcı Fonksiyon: Ship için avatar birleştir ---
 async def birlestir_avatar(ctx, kisi1, kisi2, yuzde):
-    """İki avatarı yan yana birleştir, isimleri ve yüzdeyi yaz."""
     async with aiohttp.ClientSession() as session:
         async with session.get(kisi1.avatar.url) as resp1:
             img1_data = await resp1.read()
@@ -55,13 +123,9 @@ async def birlestir_avatar(ctx, kisi1, kisi2, yuzde):
     
     img1 = Image.open(io.BytesIO(img1_data)).convert("RGBA")
     img2 = Image.open(io.BytesIO(img2_data)).convert("RGBA")
-    
-    # Boyutlandır (200x200)
     size = (200, 200)
     img1 = img1.resize(size, Image.LANCZOS)
     img2 = img2.resize(size, Image.LANCZOS)
-    
-    # Yeni tuval (500x300)
     canvas = Image.new("RGBA", (500, 300), (30, 30, 30, 255))
     canvas.paste(img1, (30, 30))
     canvas.paste(img2, (270, 30))
@@ -75,21 +139,15 @@ async def birlestir_avatar(ctx, kisi1, kisi2, yuzde):
         draw = ImageDraw.Draw(canvas)
         draw.text((220, 120), "❤️", fill="red")
     
-    # Yazılar
     draw = ImageDraw.Draw(canvas)
     try:
         font = ImageFont.truetype("arial.ttf", 20)
     except:
         font = ImageFont.load_default()
-    
-    # İsimler
     draw.text((30, 250), kisi1.display_name[:12], fill="white", font=font)
     draw.text((270, 250), kisi2.display_name[:12], fill="white", font=font)
-    
-    # Yüzde
     draw.text((210, 200), f"{yuzde}%", fill="yellow", font=font)
     
-    # Kaydet
     output = io.BytesIO()
     canvas.save(output, format="PNG")
     output.seek(0)
@@ -150,33 +208,38 @@ async def dur(ctx):
     spam_aktif = False
     await ctx.send("🛑 Spam durduruldu.")
 
-# --- ESKİ EĞLENCE KOMUTLARI (Korundu) ---
+# --- ESKİ EĞLENCE (Embed) ---
 @bot.command()
 async def valdo(ctx):
     embed = discord.Embed(description="YARRAMM VALDO BU KIM AMK", color=discord.Color.red())
+    embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
 @bot.command()
 async def gonu(ctx):
     embed = discord.Embed(description="2 GUNDE 48 CK ATAN ADAM", color=discord.Color.green())
+    embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
 @bot.command()
 async def eternal(ctx):
     embed = discord.Embed(description="FURKANIN NAMIDEGER BABASI", color=discord.Color.blue())
+    embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
 @bot.command()
 async def klowinc(ctx):
     embed = discord.Embed(description="BU ADAMIN TASSAKLARINA BETON YETMEZ", color=discord.Color.gold())
+    embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
 @bot.command()
 async def doruk(ctx):
     embed = discord.Embed(description="ARİEL BABAAAA", color=discord.Color.purple())
+    embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
-# --- MEDYA KOMUTLARI ---
+# --- MEDYA ---
 @bot.command()
 async def atam(ctx):
     try:
@@ -198,7 +261,7 @@ async def furkanvideo(ctx):
     except FileNotFoundError:
         await ctx.send("❌ furkan.mp4 bulunamadı.")
 
-# --- ÖNCEKİ YENİ EĞLENCE KOMUTLARI (Görselleştirildi) ---
+# --- GÖRSEL EĞLENCE KOMUTLARI ---
 @bot.command()
 async def zar(ctx):
     sonuc = random.randint(1, 6)
@@ -239,7 +302,6 @@ async def korkut(ctx):
 async def aşkfalı(ctx, *, isim=None):
     if isim is None:
         isim = ctx.author.display_name
-    # Rastgele bir üye seç
     uyeler = [uye for uye in ctx.guild.members if not uye.bot and uye != ctx.author]
     if uyeler:
         secilen = random.choice(uyeler)
@@ -306,8 +368,6 @@ async def ship(ctx, kisi1: discord.Member, kisi2: discord.Member = None):
             return
         kisi2 = random.choice(uyeler)
     uyum = random.randint(0, 100)
-    
-    # Görsel oluştur
     try:
         img_bytes = await birlestir_avatar(ctx, kisi1, kisi2, uyum)
         dosya = discord.File(img_bytes, filename="ship.png")
@@ -356,8 +416,7 @@ async def avatar(ctx, member: discord.Member = None):
     embed.set_image(url=member.avatar.url)
     await ctx.send(embed=embed)
 
-# --- YENİ EKLENEN EĞLENCE KOMUTLARI (Görsel) ---
-
+# --- SOSYAL KOMUTLAR (Görsel) ---
 @bot.command()
 async def öp(ctx, member: discord.Member):
     embed = discord.Embed(description=f"{ctx.author.mention} 💋 {member.mention} adlı kişiyi öptü! 🥰", color=discord.Color.pink())
@@ -400,7 +459,7 @@ async def tekme(ctx, member: discord.Member):
     embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
-# --- OYUNLAR (Görsel) ---
+# --- OYUNLAR (Görsel Ağırlıklı) ---
 @bot.command()
 async def adam_asmaca(ctx):
     kelimeler = ['python', 'discord', 'yazılım', 'bot', 'sunucu', 'klowinc']
@@ -410,7 +469,13 @@ async def adam_asmaca(ctx):
     tahmin_edilen = []
     
     while can > 0 and '_' in tahmin:
-        embed = discord.Embed(title="🔤 Adam Asmaca", description=f"Kelime: {' '.join(tahmin)}\nKalan Can: {can}\nTahminlerin: {', '.join(tahmin_edilen) if tahmin_edilen else 'Yok'}", color=discord.Color.blue())
+        # ASCII art ile adamı göster
+        ascii_resim = adam_ascii(can)
+        embed = discord.Embed(
+            title="🔤 Adam Asmaca",
+            description=f"```\n{ascii_resim}\n```\n**Kelime:** {' '.join(tahmin)}\n**Kalan Can:** {can}\n**Tahminlerin:** {', '.join(tahmin_edilen) if tahmin_edilen else 'Yok'}",
+            color=discord.Color.blue()
+        )
         embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
         await ctx.send(embed=embed)
         
@@ -439,15 +504,18 @@ async def adam_asmaca(ctx):
             await ctx.send(f"❌ '{harf}' harfi kelimede yok! Can: {can}")
     
     if '_' not in tahmin:
-        await ctx.send(f"🎉 Tebrikler! Kelime: **{kelime}**")
+        embed = discord.Embed(title="🎉 Tebrikler!", description=f"Kelimeyi buldun: **{kelime}**", color=discord.Color.gold())
+        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
+        await ctx.send(embed=embed)
     else:
-        await ctx.send(f"💀 Kaybettin! Kelime: **{kelime}**")
+        embed = discord.Embed(title="💀 Kaybettin!", description=f"Kelime: **{kelime}**", color=discord.Color.dark_red())
+        embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
+        await ctx.send(embed=embed)
 
 @bot.command()
 async def sayı_tahmin(ctx):
     sayi = random.randint(1, 50)
     deneme = 0
-    
     embed = discord.Embed(title="🎯 Sayı Tahmin", description="1 ile 50 arasında bir sayı tahmin et! (10 deneme hakkın)", color=discord.Color.green())
     embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
@@ -470,14 +538,12 @@ async def sayı_tahmin(ctx):
         except asyncio.TimeoutError:
             await ctx.send(f"⏰ Zaman aşımı! Sayı: **{sayi}**")
             return
-    
     await ctx.send(f"💀 Kaybettin! Sayı: **{sayi}**")
 
 @bot.command()
 async def taş_kağıt_makas(ctx):
     secenekler = ['taş', 'kağıt', 'makas']
     bot_secim = random.choice(secenekler)
-    
     embed = discord.Embed(title="✊ Taş, 📄 Kağıt, ✂️ Makas", description="Seçimini yaz (taş/kağıt/makas)", color=discord.Color.blue())
     embed.set_footer(text=ctx.author.display_name, icon_url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
@@ -564,7 +630,7 @@ async def kader(ctx):
     embed.set_thumbnail(url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
-# --- YÖNETİM (Görsel) ---
+# --- YÖNETİM ---
 @bot.command()
 @commands.has_permissions(administrator=True)
 async def çekiliş(ctx, *, ödül):
