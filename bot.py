@@ -2,13 +2,13 @@ import discord
 from discord.ext import commands
 import asyncio
 import os
-import sqlite3
-import aiohttp  # <-- YENİ KÜTÜPHANE (HTTP istekleri için)
+import aiohttp
 from flask import Flask
 from threading import Thread
 
 # --- Web Sunucusu (Render için) ---
 app = Flask(__name__)
+
 @app.route('/')
 def home():
     return "Bot aktif!"
@@ -21,24 +21,19 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='!', intents=intents, help_command=None)
 spam_aktif = False
 
-# --- Veritabanı (Uyarılar için) ---
-def init_db():
-    conn = sqlite3.connect('bot_data.db')
-    c = conn.cursor()
-    c.execute('CREATE TABLE IF NOT EXISTS uyari (user_id INTEGER, sayi INTEGER)')
-    conn.commit()
-    conn.close()
-
-init_db()
-
-# --- GEMINI AI (Direkt HTTP ile, SDK yok!) ---
+# --- Gemini AI (Direkt HTTP, SDK yok) ---
 async def gemini_sor(soru):
     api_key = os.environ.get("GOOGLE_API_KEY")
     if not api_key:
         return "❌ GOOGLE_API_KEY ortam değişkeni ayarlanmamış! Render'dan kontrol et."
 
-    # Önce 1.5-flash dene, olmazsa gemini-pro'ya geç
-    modeller = ["gemini-1.5-pro", "gemini-pro", "gemini-1.5-flash"]
+    modeller = [
+        "gemini-1.5-pro",
+        "gemini-1.5-flash",
+        "gemini-pro",
+        "gemini-1.0-pro"
+    ]
+
     for model in modeller:
         url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={api_key}"
         payload = {"contents": [{"parts": [{"text": soru}]}]}
@@ -53,13 +48,12 @@ async def gemini_sor(soru):
                     except (KeyError, IndexError):
                         return "⚠️ Cevap alınamadı, API yanıt formatı hatalı."
                 elif resp.status == 404:
-                    # Bu model yok, diğerini dene
-                    continue
+                    continue  # bu model yok, diğerini dene
                 else:
-                    hata = await resp.text()
-                    return f"❌ API Hatası ({resp.status}): {hata}"
-    
-    return "❌ Hiçbir model çalışmadı. API anahtarını kontrol et veya farklı bir model dene."
+                    hata_text = await resp.text()
+                    return f"❌ API Hatası ({resp.status}): {hata_text[:300]}"
+
+    return "❌ Hiçbir model çalışmadı. API anahtarını ve model isimlerini kontrol et."
 
 # --- Olaylar ---
 @bot.event
@@ -79,12 +73,12 @@ async def on_command_error(ctx, error):
 # 1. Yapay Zeka
 @bot.command()
 async def sor(ctx, *, soru):
-    """!sor <sorun> - Gemini AI'ya soru sor."""
+    """!sor <soru> - Gemini AI'ya soru sor."""
     async with ctx.typing():
         cevap = await gemini_sor(soru)
-        await ctx.send(cevap[:2000])  # Discord limiti 2000 karakter
+        await ctx.send(cevap[:2000])
 
-# 2. Eğlence komutları (aynı)
+# 2. Eğlence
 @bot.command()
 async def valdo(ctx):
     await ctx.send("YARRAMM VALDO BU KIM AMK")
@@ -105,7 +99,7 @@ async def klowinc(ctx):
 async def doruk(ctx):
     await ctx.send("ARİEL BABAAAA")
 
-# 3. Medya dosyaları (dosyaların klasöründe olduğundan emin ol)
+# 3. Medya dosyaları (klasörde olmalı)
 @bot.command()
 async def atam(ctx):
     try:
