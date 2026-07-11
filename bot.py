@@ -38,7 +38,7 @@ async def gemini_sor(soru):
         return "❌ GOOGLE_API_KEY ortam değişkeni ayarlanmamış! Render'dan kontrol et."
 
     # Önce 1.5-flash dene, olmazsa gemini-pro'ya geç
-    modeller = ["gemini-1.5-flash", "gemini-pro"]
+    modeller = ["gemini-1.5-pro", "gemini-pro", "gemini-1.5-flash"]
     for model in modeller:
         url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent?key={api_key}"
         payload = {"contents": [{"parts": [{"text": soru}]}]}
