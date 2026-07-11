@@ -1,77 +1,16 @@
 import discord
 from discord.ext import commands
 import asyncio
-import os # Dosya kontrolü için gerekli
-
-intents = discord.Intents.default()
-intents.message_content = True
-
-bot = commands.Bot(command_prefix='!', intents=intents)
-
-spam_aktif = False
-silme_aktif = False
-
-# Bilgisayarındaki 'furkan.mp4' dosyasının adı
-VIDEO_DOSYA_ADI = 'furkan.mp4'
-
-@bot.event
-async def on_ready():
-    print(f'Bot hazır: {bot.user}')
-
-# --- MESAJ KOMUTLARI ---
-@bot.command()
-async def valdo(ctx):
-    await ctx.send("YARRAMM VALDO BU KIM AMK")
-
-@bot.command()
-async def eternal(ctx):
-    await ctx.send("FURKANIN NAMIDEGER BABASI") 
-
-@bot.command()
-async def klowinc(ctx):
-    await ctx.send("BU ADAMIN TASSAKLARINA BETON YETMEZ") 
-
-@bot.command()  
-async def gonu(ctx):
-    await ctx.send("BU ADAM 2 GUNDE 48 CK ATTI UZAK DUR RİSKLİ")
-
-@bot.command()
-async def doruk(ctx):
-    await ctx.send("ARİEL BABAAAA")
-
-# --- FURKAN KOMUTU (GÜNCELLENDİ) ---
-@bot.command(name='furkan') # Komut ismini 'furkan' yapıyoruz
-async def furkan_komutu(ctx, text=None): # Artık argüman alabilir
-    # Eğer '!furkavideo' yazıldıysa video at
-    if text and text.lower() == 'video':
-        await ctx.send("Video yükleniyor...")
-        if os.path.exists(VIDEO_DOSYA_ADI):
-            try:
-                await ctx.send(file=discord.File(VIDEO_DOSYA_ADI))
-            except Exception as e:
-                await ctx.send(f"Hata: Video gönderilemedi! ({e})")
-        else:
-            await ctx.send(f"Hata: '{VIDEO_DOSYA_ADI}' dosyası klasörde bulunamadı!")
-    else:
-        # Eğer sadece '!furkan' yazıldıysa eski mesajı at
-        await ctx.send("AMCIK FURKO")
-
-@bot.command()
-async def atam(ctx):
-    # Bilgisayarındaki 'ataturk.jpg' dosyasını yükler
-   import discord
-from discord.ext import commands
-import asyncio
 import os
 from datetime import timedelta
 
+# --- AYARLAR ---
 intents = discord.Intents.default()
 intents.message_content = True
-intents.members = True # Üyeleri banlamak/susturmak için zorunludur
+intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Durum değişkenleri
 spam_aktif = False
 silme_aktif = False
 VIDEO_DOSYA_ADI = 'furkan.mp4'
@@ -80,27 +19,21 @@ VIDEO_DOSYA_ADI = 'furkan.mp4'
 async def on_ready():
     print(f'Bot hazır: {bot.user}')
 
-# --- HERKESİN KULLANABİLECEĞİ KOMUTLAR ---
+# --- KOMUTLAR ---
+@bot.command()
+async def valdo(ctx): await ctx.send("YARRAMM VALDO BU KIM AMK")
 
 @bot.command()
-async def valdo(ctx):
-    await ctx.send("YARRAMM VALDO BU KIM AMK")
+async def gonu(ctx): await ctx.send("2 GUNDE 48 CK ATAN ADAM")
 
 @bot.command()
-async def gonu(ctx):
-    await ctx.send("2 GUNDE 48 CK ATAN ADAM")
+async def eternal(ctx): await ctx.send("FURKANIN NAMIDEGER BABASI")
 
 @bot.command()
-async def eternal(ctx):
-    await ctx.send("FURKANIN NAMIDEGER BABASI")
+async def klowinc(ctx): await ctx.send("BU ADAMIN TASSAKLARINA BETON YETMEZ")
 
 @bot.command()
-async def klowinc(ctx):
-    await ctx.send("BU ADAMIN TASSAKLARINA BETON YETMEZ")
-
-@bot.command()
-async def doruk(ctx):
-    await ctx.send("ARİEL BABAAAA")
+async def doruk(ctx): await ctx.send("ARİEL BABAAAA")
 
 @bot.command(name='furkan')
 async def furkan_komutu(ctx, text=None):
@@ -118,8 +51,6 @@ async def atam(ctx):
         await ctx.send(file=discord.File('ataturk.jpg'))
     else:
         await ctx.send("Hata: ataturk.jpg dosyası bulunamadı!")
-
-# --- YÖNETİCİ KOMUTLARI (BAN, SUSTUR, SPAM, SİL) ---
 
 @bot.command()
 @commands.has_permissions(administrator=True)
@@ -180,4 +111,9 @@ async def dur_sil(ctx):
     silme_aktif = False
     await ctx.send("Kanal silme işlemi durduruldu.")
 
-bot.run('')
+# --- RENDER İÇİN GÜVENLİ ÇALIŞTIRMA ---
+token = os.environ.get('DISCORD_TOKEN')
+if token:
+    bot.run(token)
+else:
+    print("HATA: DISCORD_TOKEN bulunamadı!")
