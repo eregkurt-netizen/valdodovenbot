@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix='!', intents=intents, help_command=None)
 
 # Yapay Zeka Ayarı
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
 spam_aktif = False
 silme_aktif = False
